@@ -1,8 +1,8 @@
+from char_frequency import char_frequencies, duo_frequencies
 # https://www.gta.ufrj.br/ensino/eel879/trabalhos_vf_2010_2/gabriel/cript.htm
 
 crypted_msg = []
 descrypted_msg = ''
-from char_frequency import char_frequencies, duo_frequencies
 
 def random_char():
     return [i for i in reversed(range(255))]

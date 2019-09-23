@@ -23,7 +23,7 @@ k = 0
 r = len(A) + 1
 count = 1
 
-while(r > 0):
+while r > 0:
     index = int(B[k]) -1
     A[k] = -1
     count += 1

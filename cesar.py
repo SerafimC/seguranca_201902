@@ -8,7 +8,7 @@ print('Chave: ')
 key = ord(input()[0])
 
 for i in message:
-    if(ord(i) > 255):
+    if ord(i) > 255:
         raise Exception('Invalid input. Character {} does not belong to the alphabet'.format(i))
 
 print('Mensagem criptografada: ')
