@@ -1,3 +1,4 @@
+from functools import reduce
 from char_frequency import char_frequencies, duo_frequencies, trio_frequencies
 # https://www.gta.ufrj.br/ensino/eel879/trabalhos_vf_2010_2/gabriel/cript.htm
 
@@ -27,7 +28,7 @@ def getCharFreqs(crypted_msg):
 
 def getDuoFreqs(crypted_msg):
     duo_dict = {}
-    duo_frequencies = []
+    duo_frequencies = [] 
     count = 0
 
     for i, char in enumerate(crypted_msg, start=0):
@@ -65,10 +66,11 @@ def getTrioFreqs(crypted_msg):
 
     return sorted(trio_frequencies, key = lambda i: i['freq'], reverse = True)
 
+# def key_permutation(key_attempt, crypted_msg):
+
 def main():
 
     key = random_key()
-    key_attempt_points = [0 for i in range(255)]
     message = [c for c in 'Era uma vez em Hollywood. Filme de Quentin Tarantino. Teste mensagem criptografada. Quanto mais texto, mais facil de identificar os padroes.']
     crypted_msg = crypt_message(message, key)
 
@@ -84,11 +86,68 @@ def main():
 
     descrypted_msg = decrypt_message(crypted_msg, key_attempt)
 
-    for i, el in enumerate(key_attempt_points, start=0):
-        for char in crypted_char_frequencies:
-            if char['char'] == i:
-                key_attempt_points[i] += char['freq']
-
-    print(key_attempt_points)
     
-main()
+    
+# main()
+key = random_key()
+message = [c for c in 'Era uma vez em Hollywood. Filme de Quentin Tarantino. Teste mensagem criptografada. Quanto mais texto, mais facil de identificar os padroes.']
+crypted_msg = crypt_message(message, key)
+key_attempt_points = [-1 for i in range(255)]
+
+key_attempt = [-1 for i in range(255)]
+sorted_freqs = sorted(char_frequencies, key = lambda i: i['freq'], reverse = True)
+
+crypted_char_frequencies = getCharFreqs(crypted_msg)
+crypted_duo_frequencies = getDuoFreqs(crypted_msg)
+crypted_trio_frequencies = getTrioFreqs(crypted_msg)
+
+for i, el in enumerate(sorted(crypted_char_frequencies, key = lambda i: i['freq'], reverse = True), start = 0):
+    key_attempt[el['char']] = sorted_freqs[i]['char']
+
+for process in range(2):
+
+    for char, pt in enumerate(key_attempt_points, start=0):
+        
+        for chars in crypted_char_frequencies:
+            if char == chars['char']:
+                for base_char in char_frequencies:
+                    if chars['char'] == base_char['char']:
+                        key_attempt_points[char] = (chars['freq'] + base_char['freq'])
+
+        # for duos in crypted_duo_frequencies:
+        #     if str(char) in duos['duo'].split('|'):
+        #         key_attempt_points[char] += duos['freq']
+
+        # for trios in crypted_trio_frequencies:
+        #     if str(char) in trios['trio'].split('|'):
+        #         key_attempt_points[char] += trios['freq']
+
+        key_attempt_points[char] = key_attempt_points[char] / 3
+
+    l = list(filter(lambda x: x > 0, key_attempt_points))
+    avg = reduce((lambda x, y: x + y), l) / len(l)
+    
+    need_change = []
+    for char, pt in enumerate(key_attempt_points, start=0):    
+        if pt < avg and pt >= 0.0:
+            need_change.append(char)
+    
+    enum = 0
+    for char, i in enumerate(key_attempt, start=0):
+        if char in need_change:
+            if char == need_change[len(need_change)-1]:
+                key_attempt[i] = need_change[0]
+            else:
+                enum += 1
+                key_attempt[i] = need_change[enum]
+
+    
+    descrypted_msg = decrypt_message(crypted_msg, key_attempt)  
+    descrypt_attempt = [ord(ch) for ch in descrypted_msg]
+    
+    crypted_char_frequencies = getCharFreqs(descrypt_attempt)
+    crypted_duo_frequencies = getDuoFreqs(descrypt_attempt)
+    crypted_trio_frequencies = getTrioFreqs(descrypt_attempt)  
+
+descrypted_msg = decrypt_message(crypted_msg, key_attempt)
+print(descrypted_msg)
