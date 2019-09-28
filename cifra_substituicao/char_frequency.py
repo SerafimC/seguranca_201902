@@ -1,4 +1,4 @@
-filename = "texto_base.txt"
+filename = "texto_base2.txt"
 
 def get_frequencies(filename):
   char_frequencies = [0 for i in range(255)]

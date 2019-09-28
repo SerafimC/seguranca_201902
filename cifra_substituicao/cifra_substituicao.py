@@ -104,21 +104,23 @@ crypted_trio_frequencies = getTrioFreqs(crypted_msg)
 
 for k, kca in enumerate(key_chars_attempts, start=0):
     for krpt_char in crypted_msg:
-        for krpt_freqs in sorted(crypted_char_frequencies, key = lambda i: i['freq'], reverse = True):
-            if krpt_char == krpt_freqs['char']:
-                for lg_freq in sorted_freqs:        
-                    key_chars_attempts[k].append({"char": lg_freq['char'] , "prob" : 1 - ((lg_freq['freq'] - krpt_freqs['freq'])**2)**0.5})
-
+        idx = next((index for (index, d) in enumerate(crypted_char_frequencies) if d['char'] == krpt_char), None)
+        if idx >= 0:
+            for lg_freq in sorted_freqs: 
+                key_chars_attempts[k].append({"char": lg_freq['char'] , "prob" : ((lg_freq['freq'] - crypted_char_frequencies[idx]['freq'])**2)**0.5})
+                    
 
 for i in range(len(key_chars_attempts)):
-    key_chars_attempts[i] = sorted(key_chars_attempts[i], key = lambda i: i['prob'], reverse = True)[:5]
+    # print(key_chars_attempts[i][:5])
+    key_chars_attempts[i] = sorted(key_chars_attempts[i], key = lambda k: k['prob'], reverse = False)
 
+for t in sorted_freqs:
+    print(t['char'])
 
 for i, kca in enumerate(key_chars_attempts,start=0):
     if len(kca) > 0:
         key_attempt[i] = kca[0]['char']
 
-# descrypted_msg = decrypt_message(crypted_msg, key_attempt)
-# print(descrypted_msg)
+descrypted_msg = decrypt_message(crypted_msg, key_attempt)
+print(descrypted_msg)
 
-print(key_chars_attempts[:2])
