@@ -1,4 +1,6 @@
 filename = "texto_base2.txt"
+message_filename = "message.txt"
+message_file = ''
 
 def get_frequencies(filename):
   char_frequencies = [0 for i in range(255)]
@@ -52,3 +54,13 @@ def get_frequencies(filename):
   return char_frequencies, duo_frequencies, trio_frequencies
 
 char_frequencies, duo_frequencies, trio_frequencies = get_frequencies(filename)
+
+with open(message_filename) as f:
+    while True:
+      c = f.read(1)
+      if not c:
+        break
+      if ord(c) < 255:
+          message_file += c
+
+dictionary = set(message_file.split(' '))

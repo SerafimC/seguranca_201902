@@ -1,5 +1,5 @@
 from functools import reduce
-from char_frequency import char_frequencies, duo_frequencies, trio_frequencies
+from char_frequency import char_frequencies, duo_frequencies, trio_frequencies, message_file, dictionary
 # https://www.gta.ufrj.br/ensino/eel879/trabalhos_vf_2010_2/gabriel/cript.htm
 
 def random_key():
@@ -9,7 +9,7 @@ def decrypt_message(crypted_msg, key):
     descrypted_msg = ''
     
     for i in crypted_msg:
-        descrypted_msg += chr(key[int(i)])
+        descrypted_msg += chr(key[i])
     return descrypted_msg
 
 def crypt_message(message, key):
@@ -66,36 +66,12 @@ def getTrioFreqs(crypted_msg):
 
     return sorted(trio_frequencies, key = lambda i: i['freq'], reverse = True)
 
-# def key_permutation(key_attempt, crypted_msg):
-
-def main():
-
-    key = random_key()
-    message = [c for c in 'Era uma vez em Hollywood. Filme de Quentin Tarantino. Teste mensagem criptografada. Quanto mais texto, mais facil de identificar os padroes.']
-    crypted_msg = crypt_message(message, key)
-
-    crypted_char_frequencies = getCharFreqs(crypted_msg)
-    crypted_duo_frequencies = getDuoFreqs(crypted_msg)
-    crypted_trio_frequencies = getTrioFreqs(crypted_msg)
-
-    key_attempt = [-1 for i in range(255)]
-    sorted_freqs = sorted(char_frequencies, key = lambda i: i['freq'], reverse = True)
-
-    for i, el in enumerate(sorted(crypted_char_frequencies, key = lambda i: i['freq'], reverse = True), start = 0):
-        key_attempt[el['char']] = sorted_freqs[i]['char']
-
-    descrypted_msg = decrypt_message(crypted_msg, key_attempt)
-
-    
-    
-# main()
 key = random_key()
-message = [c for c in 'Era uma vez em Hollywood. Filme de Quentin Tarantino. Teste mensagem criptografada. Quanto mais texto, mais facil de identificar os padroes.']
+message = [c for c in message_file]
 crypted_msg = crypt_message(message, key)
 
+key_attempt = [-1 for i in range(255)]
 key_chars_attempts = [[] for i in range(255)]
-
-key_attempt = [56 for i in range(255)]
 sorted_freqs = sorted(char_frequencies, key = lambda i: i['freq'], reverse = True)
 
 crypted_char_frequencies = getCharFreqs(crypted_msg)
@@ -103,24 +79,52 @@ crypted_duo_frequencies = getDuoFreqs(crypted_msg)
 crypted_trio_frequencies = getTrioFreqs(crypted_msg)
 
 for k, kca in enumerate(key_chars_attempts, start=0):
-    for krpt_char in crypted_msg:
-        idx = next((index for (index, d) in enumerate(crypted_char_frequencies) if d['char'] == krpt_char), None)
-        if idx >= 0:
-            for lg_freq in sorted_freqs: 
-                key_chars_attempts[k].append({"char": lg_freq['char'] , "prob" : ((lg_freq['freq'] - crypted_char_frequencies[idx]['freq'])**2)**0.5})
-                    
+
+    idx_lg = next((index for (index, d) in enumerate(sorted_freqs) if d['char'] == k), -1)
+    
+    for l, krp_char in enumerate(crypted_char_frequencies, start=0):        
+        idx_kca = next((index for (index, d) in enumerate(key_chars_attempts[k]) if d['char'] == k), -1)
+           
+        if sorted_freqs[idx_lg]['freq'] == 0 and krp_char['freq'] == 0:
+            key_chars_attempts[krp_char['char']].append({"char": k, "prob" : 0.0 })
+        else:
+            key_chars_attempts[krp_char['char']].append({"char": k , "prob" : (100 -((sorted_freqs[idx_lg]['freq'] - krp_char['freq'])**2)**0.5) })
 
 for i in range(len(key_chars_attempts)):
-    # print(key_chars_attempts[i][:5])
-    key_chars_attempts[i] = sorted(key_chars_attempts[i], key = lambda k: k['prob'], reverse = False)
-
-for t in sorted_freqs:
-    print(t['char'])
+    key_chars_attempts[i] = sorted(key_chars_attempts[i], key = lambda k: k['prob'], reverse = True)
 
 for i, kca in enumerate(key_chars_attempts,start=0):
-    if len(kca) > 0:
-        key_attempt[i] = kca[0]['char']
+    key_attempt[i] = kca[0]['char'] 
+
+points = 0
+prev_points = 0
+
+kpt_alph = set(crypted_msg)
+iterator = 0
+iterator_kpt = 0
+
+while(points < 14):
+    points = 0 
+    key_attempt_copy = key_attempt.copy()
+
+    for i, kca in enumerate(key_chars_attempts,start=0):
+        if i == iterator_kpt:
+            key_attempt[i] = kca[iterator]['char'] 
+    
+    descrypted_msg = decrypt_message(crypted_msg, key_attempt)
+
+    for dict in dictionary:
+        for word in descrypted_msg.split(' '):
+            if dict == word:
+                # print(word)
+                points += 1
+    print(points)
+    if points < prev_points:
+        key_attempt = key_attempt_copy.copy()
+
+    iterator = (iterator + 1) % len(key_attempt)
+    iterator_kpt = (iterator_kpt + 1) % len(kpt_alph)
+    prev_points = points
 
 descrypted_msg = decrypt_message(crypted_msg, key_attempt)
 print(descrypted_msg)
-
