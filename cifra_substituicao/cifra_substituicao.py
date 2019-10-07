@@ -116,15 +116,17 @@ while(points < 14):
     for dict in dictionary:
         for word in descrypted_msg.split(' '):
             if dict == word:
-                # print(word)
+                print(word)
                 points += 1
-    print(points)
+    
     if points < prev_points:
         key_attempt = key_attempt_copy.copy()
-
+    print(points)
     iterator = (iterator + 1) % len(key_attempt)
     iterator_kpt = (iterator_kpt + 1) % len(kpt_alph)
     prev_points = points
 
 descrypted_msg = decrypt_message(crypted_msg, key_attempt)
 print(descrypted_msg)
+print()
+# print(decrypt_message(crypted_msg, key))

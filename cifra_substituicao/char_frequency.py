@@ -1,6 +1,7 @@
 filename = "texto_base2.txt"
 message_filename = "message.txt"
 message_file = ''
+texto_base = ''
 
 def get_frequencies(filename):
   char_frequencies = [0 for i in range(255)]
@@ -63,4 +64,12 @@ with open(message_filename) as f:
       if ord(c) < 255:
           message_file += c
 
-dictionary = set(message_file.split(' '))
+with open(filename) as f:
+    while True:
+      c = f.read(1)
+      if not c:
+        break
+      if ord(c) < 255:
+          texto_base += c
+
+dictionary = set(texto_base.split(' '))
