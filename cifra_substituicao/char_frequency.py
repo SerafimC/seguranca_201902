@@ -1,6 +1,7 @@
 filename = "texto_base2.txt"
 message_filename = "message.txt"
 message_file = ''
+message = ''
 texto_base = ''
 
 def get_frequencies(filename):

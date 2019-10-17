@@ -1,43 +1,20 @@
-# from binarytree import tree, bst, heap
-from char_frequency import char_frequencies
-tree_nodes = []
+from trie import TS
+from char_frequency import message
+output_text = ''
+output_file = "message.bin"
 
-class Node:
-    def __init__(self, char, freq, left=None, right=None) :
-        self.char = char
-        self.freq = freq
-        self.left  = left
-        self.right = right
+def bitstring_to_bytes(s):
+    v = int(s, 2)
+    b = bytearray()
+    while v:
+        b.append(v & 0xff)
+        v >>= 8
+    return bytes(b[:])
 
-    def __str__(self) :
-        return str(self.freq)
+f= open(output_file,"wb")
+f.truncate(0) # Limpa o arquivo 
 
-class Tree:
-    def __init__(self, node):
-        self.root = node
+for char in message:
+    f.write(bitstring_to_bytes(TS[ord(char)]))
 
-    def insert(self, node):
-        current = self.root
-        cursor = self.root
-        while(not cursor):
-            current = cursor
-            if node.freq >= cursor.freq:
-                pass
-            else:
-                pass
-
-for c in char_frequencies:
-    if c['freq'] > 0:
-       tree_nodes.append(Node(c['char'], c['freq']))
-
-tree = Tree(tree_nodes[0])
-tree_nodes.pop(0)
-    
-while len(tree_nodes) > 1 :
-    x = tree_nodes[0]
-    y = tree_nodes[1]
-    parent = Node('', x.freq + y.freq, x, y)
-    tree_nodes.pop(0)
-    tree_nodes.pop(0)
-    tree.insert(parent)
-   
+f.close()
